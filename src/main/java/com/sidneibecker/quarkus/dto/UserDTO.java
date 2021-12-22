@@ -2,6 +2,8 @@ package com.sidneibecker.quarkus.dto;
 
 public class UserDTO {
 
+	private Long id;
+
 	private String name;
 
 	private String login;
@@ -20,6 +22,14 @@ public class UserDTO {
 
 	public void setLogin(String login) {
 		this.login = login;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }
