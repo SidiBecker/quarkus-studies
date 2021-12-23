@@ -10,7 +10,7 @@ public class Startup {
 
 	void onStart(@Observes StartupEvent ev) {
 		System.out.println("Running onStart...");
-		DatabaseListener.init();
+		//DatabaseListener.init();
 	}
 
 }

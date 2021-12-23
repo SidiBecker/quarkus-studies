@@ -8,6 +8,8 @@ public class UserDTO {
 
 	private String login;
 
+	private String password;
+
 	public String getName() {
 		return name;
 	}
@@ -30,6 +32,14 @@ public class UserDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 }

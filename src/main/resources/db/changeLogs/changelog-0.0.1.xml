@@ -1,18 +1,62 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
     http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet author="quarkus" id="test">
-        <createTable tableName="quarkus">
-            <column name="ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="NAME" type="VARCHAR(255)"/>
-        </createTable>
-    </changeSet>
+	<changeSet author="quarkus-studies" id="create_tb_user">
+
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="tb_user" />
+			</not>
+		</preConditions>
+
+		<createTable tableName="tb_user">
+			<column name="id_user" type="NUMBER(18,0)">
+				<constraints primaryKey="true" primaryKeyName="user_pk"
+					nullable="false" />
+			</column>
+			<column name="tx_name" type="VARCHAR(255)" />
+			<column name="tx_login" type="VARCHAR(255)" />
+			<column name="tx_password" type="VARCHAR(255)" />
+			<column name="dt_create" type="DATETIME"
+				defaultValueDate="now()" />
+			<column name="dt_update" type="DATETIME"
+				defaultValueDate="now()" />
+		</createTable>
+
+		<createSequence incrementBy="1" sequenceName="gen_user"
+			startValue="1" />
+	</changeSet>
+	
+		<changeSet id="create_pcd_notify_user" author="quarkus-studies">
+		<sql splitStatements="false">
+			CREATE OR REPLACE FUNCTION notify_user()
+			RETURNS trigger
+			LANGUAGE plpgsql
+			AS $function$
+			BEGIN
+				PERFORM pg_notify(
+			 		CAST('database_events' AS text),
+			    	'User id: ' || new.id_user::text || ' was updated!');
+				RETURN NEW;
+			END;
+			$function$;
+		</sql>
+	</changeSet>
+	
+	<changeSet id="create_trigger_upd_user" author="quarkus-studies">
+		<sql splitStatements="false">
+			CREATE or replace TRIGGER tgr_on_upd_user AFTER
+			UPDATE on tb_user 
+			for each row 
+			execute procedure notify_user();
+		</sql>
+	</changeSet>
+	
 </databaseChangeLog>

@@ -28,8 +28,14 @@ public class User extends PanacheEntityBase {
 	@Column(name = "tx_login")
 	private String login;
 
-	@Column(name = "dt_creation")
-	private Date creationDate;
+	@Column(name = "tx_password")
+	private String password;
+
+	@Column(name = "dt_create")
+	private Date createDate;
+
+	@Column(name = "dt_update")
+	private Date updateDate;
 
 	public Long getId() {
 		return id;
@@ -55,12 +61,28 @@ public class User extends PanacheEntityBase {
 		this.login = login;
 	}
 
-	public Date getCreationDate() {
-		return creationDate;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 }

@@ -18,6 +18,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import com.sidneibecker.quarkus.dto.UserDTO;
 import com.sidneibecker.quarkus.model.User;
 
+import io.quarkus.elytron.security.common.BcryptUtil;
+
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -36,7 +38,9 @@ public class UserController {
 		User user = new User();
 		user.setName(userDTO.getName());
 		user.setLogin(userDTO.getLogin());
-		user.setCreationDate(new Date());
+		user.setPassword(BcryptUtil.bcryptHash(userDTO.getPassword()));
+		user.setCreateDate(new Date());
+		user.setUpdateDate(new Date());
 
 		User.persist(user);
 
@@ -57,6 +61,8 @@ public class UserController {
 
 		user.setLogin(userDTO.getLogin());
 		user.setName(userDTO.getName());
+		user.setPassword(BcryptUtil.bcryptHash(userDTO.getPassword()));
+		user.setUpdateDate(new Date());
 
 		User.persist(user);
 

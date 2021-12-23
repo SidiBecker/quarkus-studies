@@ -2,43 +2,57 @@ package com.sidneibecker.quarkus.startup;
 
 import java.sql.Statement;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Singleton;
+
 import com.impossibl.postgres.api.jdbc.PGConnection;
 import com.impossibl.postgres.api.jdbc.PGNotificationListener;
 import com.impossibl.postgres.jdbc.PGDataSource;
 import com.sidneibecker.quarkus.util.Util;
 
+import io.quarkus.runtime.Startup;
+
+@Singleton
+@Startup
 public class DatabaseListener {
 
-	public static void init() {
+	@PostConstruct
+	public void init() {
 		System.out.println("Starting database listeners...");
 
 		PGDataSource dataSource = new PGDataSource();
-		dataSource.setHost(Util.getApplicationProperty("quarkus.datasource.host"));
-		dataSource.setPort(Integer.parseInt(Util.getApplicationProperty("quarkus.datasource.port")));
-		dataSource.setDatabaseName(Util.getApplicationProperty("quarkus.datasource.name"));
+		dataSource.setHost(Util.getApplicationProperty("custom.datasource.host"));
+		dataSource.setPort(Integer.parseInt(Util.getApplicationProperty("custom.datasource.port")));
+		dataSource.setDatabaseName(Util.getApplicationProperty("custom.datasource.name"));
 		dataSource.setUser(Util.getApplicationProperty("quarkus.datasource.username"));
 		dataSource.setPassword(Util.getApplicationProperty("quarkus.datasource.password"));
 
-		try (PGConnection connection = (PGConnection) dataSource.getConnection()) {
+		try {
+			PGConnection connection = (PGConnection) dataSource.getConnection();
 
-			Statement statement = connection.createStatement();
-			statement.execute("LISTEN database_events");
-			statement.close();
-			connection.addNotificationListener(new PGNotificationListener() {
+			System.out.println("PG CONNECTON: " + connection);
+			Statement listenStatement = connection.createStatement();
+			listenStatement.execute("LISTEN database_events");
+			listenStatement.close();
+
+			/// Do not let this reference go out of scope!
+			PGNotificationListener listener = new PGNotificationListener() {
+
+				@Override
 				public void notification(int processId, String channelName, String payload) {
 					System.out.println("Received Notification: process id: " + processId + ", channel: " + channelName
 							+ ", message: " + payload);
+
 				}
 
 				public void closed() {
 					System.out.println("Database listeners closed");
 				}
+			};
+			connection.addNotificationListener(listener);
 
-			});
 			System.out.println("Database listeners started");
-			while (true) {
-				Thread.sleep(500);
-			}
+
 		} catch (Exception e) {
 			System.err.println(e);
 		}
