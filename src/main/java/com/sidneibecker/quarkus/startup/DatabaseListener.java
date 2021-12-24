@@ -3,11 +3,13 @@ package com.sidneibecker.quarkus.startup;
 import java.sql.Statement;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.impossibl.postgres.api.jdbc.PGConnection;
 import com.impossibl.postgres.api.jdbc.PGNotificationListener;
 import com.impossibl.postgres.jdbc.PGDataSource;
+import com.sidneibecker.quarkus.kafka.UserProducer;
 import com.sidneibecker.quarkus.util.Util;
 
 import io.quarkus.runtime.Startup;
@@ -15,6 +17,9 @@ import io.quarkus.runtime.Startup;
 @Singleton
 @Startup
 public class DatabaseListener {
+
+	@Inject
+	private UserProducer userProducer;
 
 	@PostConstruct
 	public void init() {
@@ -40,8 +45,9 @@ public class DatabaseListener {
 
 				@Override
 				public void notification(int processId, String channelName, String payload) {
-					System.out.println("Received Notification: process id: " + processId + ", channel: " + channelName
-							+ ", message: " + payload);
+					System.out.println("Received Notification from database: " + payload);
+
+					userProducer.emittUser(payload);
 
 				}
 
